@@ -1,0 +1,45 @@
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
+license="${mod_license}"
+
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
+authors="${mod_authors}"
+credits="Built on MineColonies, Structurize, BlockUI and Domum Ornamentum by the LDT Team."
+logoFile="${mod_id}.png"
+logoBlur=false
+# Client-only addon: servers do not need it, and a server that has it (at any version) is not flagged.
+displayTest="IGNORE_ALL_VERSION"
+description='''
+Client-side addon for MineColonies that redraws its windows as vanilla Minecraft screens.
+
+- Citizen, town hall, hut and university screens, research trees, build tool, Architect's Cutter and every other MineColonies window, in the Minecraft Java style.
+- A permanent HUD showing the resources your builders still need (pin a Resource Scroll with J).
+- Beacon beams to find citizens, huts and graves.
+
+Client only: nothing to install on the server. Every screen can be switched off in the config (K).
+'''
+
+[[dependencies.${mod_id}]]
+    modId="neoforge"
+    type="required"
+    versionRange="[${neo_version},)"
+    ordering="NONE"
+    side="CLIENT"
+
+[[dependencies.${mod_id}]]
+    modId="minecraft"
+    type="required"
+    versionRange="${minecraft_version_range}"
+    ordering="NONE"
+    side="CLIENT"
+
+[[dependencies.${mod_id}]]
+    modId="minecolonies"
+    type="required"
+    reason="This addon replaces MineColonies' windows."
+    versionRange="${minecolonies_version_range}"
+    ordering="AFTER"
+    side="CLIENT"

@@ -1,0 +1,136 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.148'
+    id 'idea'
+}
+
+version = mod_version
+group = mod_group_id
+
+base {
+    // mcvanillatweaks-1.21.1-<version>.jar: players can tell the Minecraft version from the file name.
+    archivesName = "${mod_id}-${minecraft_version}"
+}
+
+// Mojang ships Java 21 to end users in 1.21.1, so mods should target Java 21.
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+// Dev only, never packaged: screenshots of the citizen screen filled with a sample citizen (./gradlew runPreview).
+sourceSets {
+    preview {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+
+neoForge {
+    version = project.neo_version
+
+    runs {
+        client {
+            client()
+        }
+        preview {
+            client()
+            sourceSet = sourceSets.preview
+            // Opens each citizen page at the title screen and saves run/screenshots/citizen_*.png, then quits.
+            systemProperty 'mcvanillatweaks.preview', 'true'
+            // ./gradlew runPreview -Ponly=hut_field,townhall_ : only the captures whose name starts with one of these.
+            systemProperty 'mcvanillatweaks.preview.only', project.findProperty('only') ?: ''
+        }
+
+        configureEach {
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.INFO
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+            sourceSet(sourceSets.preview)
+        }
+    }
+}
+neoForge.addModdingDependenciesTo(sourceSets.preview)
+
+// 'localRuntime': present when running the game from the dev environment, never exposed to dependents.
+configurations {
+    runtimeClasspath.extendsFrom localRuntime
+    previewCompileOnly.extendsFrom compileOnly
+    previewRuntimeClasspath.extendsFrom localRuntime
+}
+
+def colonyJars = files(
+        "libs/minecolonies-${minecolonies_version}.jar",
+        "libs/structurize-${structurize_version}.jar",
+        "libs/blockui-${blockui_version}.jar",
+        "libs/domum-ornamentum-${domum_version}.jar"
+)
+
+dependencies {
+    // MineColonies and its required libraries: compiled against, never bundled.
+    compileOnly colonyJars
+    localRuntime colonyJars
+}
+
+var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
+    var replaceProperties = [
+            minecraft_version          : minecraft_version,
+            minecraft_version_range    : minecraft_version_range,
+            neo_version                : neo_version,
+            loader_version_range       : loader_version_range,
+            minecolonies_version_range : minecolonies_version_range,
+            mod_id                     : mod_id,
+            mod_name                   : mod_name,
+            mod_license                : mod_license,
+            mod_version                : mod_version,
+            mod_authors                : mod_authors,
+    ]
+    inputs.properties replaceProperties
+    expand replaceProperties
+    from "src/main/templates"
+    into "build/generated/sources/modMetadata"
+}
+sourceSets.main.resources.srcDir generateModMetadata
+neoForge.ideSyncTask generateModMetadata
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.named('jar', Jar) {
+    from('LICENSE') {
+        rename { "LICENSE_${mod_id}" }
+    }
+    manifest {
+        attributes(
+                'Implementation-Title'  : mod_name,
+                'Implementation-Version': mod_version,
+                'Implementation-Vendor' : mod_authors,
+        )
+    }
+}
+
+// The GPL asks for the source next to the jar: ./gradlew sourceZip -> build/distributions/<jar name>-source.zip,
+// to upload with each release. MineColonies' jars (libs/) are left out: players get them from MineColonies' pages.
+tasks.register('sourceZip', Zip) {
+    group = 'build'
+    description = 'Packs the source code to publish next to the jar.'
+    archiveBaseName = base.archivesName
+    archiveClassifier = 'source'
+    from(projectDir) {
+        include 'src/**', 'gradle/**', 'build.gradle', 'settings.gradle', 'gradle.properties', 'gradlew', 'gradlew.bat',
+                'LICENSE', 'README.md', 'CHANGELOG.md', 'docs/**', '.gitignore', '.gitattributes'
+    }
+}
+tasks.named('build') {
+    dependsOn 'sourceZip'
+}
+
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}
