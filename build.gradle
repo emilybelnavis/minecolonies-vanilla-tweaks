@@ -30,6 +30,12 @@ neoForge {
         client {
             client()
         }
+        // Dedicated server check (citizen names are server side): ./gradlew runServer, in its own folder.
+        server {
+            server()
+            gameDirectory = project.file('run-server')
+            programArgument '--nogui'
+        }
         preview {
             client()
             sourceSet = sourceSets.preview
@@ -65,11 +71,12 @@ def colonyJars = files(
         "libs/minecolonies-${minecolonies_version}.jar",
         "libs/structurize-${structurize_version}.jar",
         "libs/blockui-${blockui_version}.jar",
-        "libs/domum-ornamentum-${domum_version}.jar"
+        "libs/domum-ornamentum-${domum_version}.jar",
+        "libs/multipiston-${multipiston_version}.jar"
 )
 
 dependencies {
-    // MineColonies and its required libraries: compiled against, never bundled.
+    // MineColonies, its required libraries and the optional MultiPiston: compiled against, never bundled.
     compileOnly colonyJars
     localRuntime colonyJars
 }
@@ -126,6 +133,51 @@ tasks.register('sourceZip', Zip) {
 }
 tasks.named('build') {
     dependsOn 'sourceZip'
+}
+
+// Before handing out a jar: ./gradlew scanPersonalData looks for every word of personal-data-terms.txt (one per line,
+// case ignored, # = comment; the file stays local and is never packed) in the names and bytes of every file of the
+// jar and the source zip already in build/. Fails with the list of hits.
+tasks.register('scanPersonalData') {
+    group = 'verification'
+    description = 'Checks that the jar and the source zip contain none of the words of personal-data-terms.txt.'
+    mustRunAfter 'jar', 'sourceZip'
+    def termsFile = file('personal-data-terms.txt')
+    def archives = [tasks.named('jar').flatMap { it.archiveFile }, tasks.named('sourceZip').flatMap { it.archiveFile }]
+    doLast {
+        if (!termsFile.exists()) {
+            throw new GradleException("No ${termsFile.name}: write the words to look for, one per line.")
+        }
+        def terms = termsFile.readLines('UTF-8').collect { it.trim() }.findAll { it && !it.startsWith('#') }
+        // Compared as bytes: each UTF-8 byte becomes one ISO-8859-1 char, so binary files are searched too (both sides
+        // lower-cased the same way, so accented words still match).
+        def needles = terms.collectEntries { [(it): new String(it.toLowerCase().getBytes('UTF-8'), 'ISO-8859-1').toLowerCase()] }
+        def hits = []
+        archives.each { provider ->
+            def archive = provider.get().asFile
+            if (!archive.exists()) {
+                throw new GradleException("${archive.name} is missing: run ./gradlew build first.")
+            }
+            new java.util.zip.ZipFile(archive).withCloseable { zip ->
+                zip.entries().each { entry ->
+                    if (entry.directory) {
+                        return
+                    }
+                    def text = new String(zip.getInputStream(entry).bytes, 'ISO-8859-1').toLowerCase()
+                    def name = entry.name.toLowerCase()
+                    needles.each { term, needle ->
+                        if (text.contains(needle) || name.contains(term.toLowerCase())) {
+                            hits << "${archive.name}: ${entry.name}: ${term}"
+                        }
+                    }
+                }
+            }
+        }
+        if (hits) {
+            throw new GradleException("Personal data found:\n" + hits.join('\n'))
+        }
+        logger.lifecycle("No personal data in ${archives.collect { it.get().asFile.name }.join(' and ')} (${terms.size()} words).")
+    }
 }
 
 idea {

@@ -441,7 +441,7 @@ public final class ClipboardScreen extends Screen
     }
 
     /** How long ago the player left the colony, as MineColonies stopped updating it then. */
-    private static Component age(final IColonyView colony)
+    static Component age(final IColonyView colony)
     {
         final Long since = ColonyFreshness.sinceInside(colony);
         if (since == null)

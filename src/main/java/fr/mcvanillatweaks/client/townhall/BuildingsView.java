@@ -22,11 +22,12 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * The clipboard's huts page: every hut of the colony, by name (same types together), with its level and distance; a
- * click puts a {@link LocateBeams} beam on it (and closes the clipboard so the player sees it), or takes it away.
+ * The huts of a colony (the clipboard's huts page, the colony guide's list): every hut by name (same types together)
+ * or closest first, with its level, distance and direction; a click puts a {@link LocateBeams} beam on it (and closes
+ * the screen so the player sees it), or takes it away.
  * <pre>
- * | [hut] Guard Tower                    Lvl 2 · 54 m  (o) |
- * | [hut] Guard Tower                    Lvl 1 · 120 m     |
+ * | [hut] Guard Tower                  Lvl 2 · 54 m ↗  (o) |
+ * | [hut] Guard Tower                  Lvl 1 · 120 m ←     |
  * </pre>
  */
 final class BuildingsView
@@ -44,6 +45,7 @@ final class BuildingsView
     private final ScrollArea list = new ScrollArea();
     private List<Row> rows = List.of();
     private String filter = "";
+    private boolean byDistance;
     private int total;
     private int ticks;
 
@@ -56,6 +58,21 @@ final class BuildingsView
     int total()
     {
         return total;
+    }
+
+    boolean byDistance()
+    {
+        return byDistance;
+    }
+
+    /** Closest first, or by name (huts of a type together). */
+    void setByDistance(final boolean byDistance)
+    {
+        if (byDistance != this.byDistance)
+        {
+            this.byDistance = byDistance;
+            refresh();
+        }
     }
 
     void setFilter(final String filter)
@@ -98,7 +115,17 @@ final class BuildingsView
                 MineColoniesVanillaTweaks.LOGGER.debug("Hut left out of the clipboard list", e);
             }
         }
-        list.sort(Comparator.comparing(Row::sortKey).thenComparingDouble(row -> distance(row.building())));
+        if (byDistance)
+        {
+            list.sort(Comparator.comparingDouble((Row row) -> {
+                final double distance = distance(row.building());
+                return distance < 0 ? Double.MAX_VALUE : distance;
+            }).thenComparing(Row::sortKey));
+        }
+        else
+        {
+            list.sort(Comparator.comparing(Row::sortKey).thenComparingDouble(row -> distance(row.building())));
+        }
         rows = list;
         total = count;
     }
@@ -149,7 +176,8 @@ final class BuildingsView
                                       ? Component.translatable("mcvanillatweaks.hut.level_short", building.getBuildingLevel())
                                       : Component.translatable("mcvanillatweaks.clipboard.buildings.unbuilt");
             final Component info = distance < 0 ? level
-                                     : level.copy().append(Component.translatable("mcvanillatweaks.clipboard.buildings.distance", (int) distance));
+                                     : level.copy().append(Component.translatable("mcvanillatweaks.clipboard.buildings.distance", (int) distance))
+                                         .append(" " + LocateBeams.arrow(Vec3.atBottomCenterOf(building.getID())));
             final int infoWidth = font.width(info);
             g.drawString(font, info, right - infoWidth, rowY + 7, Gui.LIST_SOFT, true);
             final int textX = list.listX() + 24;

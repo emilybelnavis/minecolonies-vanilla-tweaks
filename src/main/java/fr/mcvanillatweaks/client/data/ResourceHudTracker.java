@@ -31,7 +31,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.items.wrapper.InvWrapper;
 import org.jetbrains.annotations.Nullable;
 
@@ -162,7 +161,7 @@ public final class ResourceHudTracker
         {
             if (mc.screen == null)
             {
-                mc.setScreen(new ConfigurationScreen(MineColoniesVanillaTweaks.container(), null));
+                fr.mcvanillatweaks.client.ModSettings.open(null);
             }
         }
         while (KeyBindings.HUD_LAYOUT.consumeClick())

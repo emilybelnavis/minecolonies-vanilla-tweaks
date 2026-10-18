@@ -319,13 +319,12 @@ final class RequestsPage extends PageView
             }
             final int buttonY = rowY + (ROW - BUTTON) / 2;
             final IRequest<?> request = nodes.get(i).request();
-            if (Gui.inside(mouseX, mouseY, fulfillX(), buttonY, BUTTON, BUTTON) && module.isFulfillable(request)
-                  && module instanceof RequestTreeWindowModule.IRequestTreeSupportsFulfill fulfill)
+            if (Gui.inside(mouseX, mouseY, fulfillX(), buttonY, BUTTON, BUTTON) && module.isFulfillable(request))
             {
                 Gui.clickSound();
                 // MineColonies' "fulfill" advancement listens to this exact button id and window.
                 CitizenScreens.trigger("fulfill", RequestWindowCitizen.WINDOW_ID);
-                fulfill.onFulfill(request);
+                fulfill(module, request);
                 handled.add(request.getId());
                 refresh();
                 return true;
@@ -351,6 +350,30 @@ final class RequestsPage extends PageView
             return true;
         }
         return false;
+    }
+
+    /**
+     * Gives the request its items. Since MineColonies 1.1.1403 {@code onFulfill(IRequest)} is on the module itself;
+     * before, it was on the {@code RequestTreeWindowModule.IRequestTreeSupportsFulfill} interface, called by reflection.
+     */
+    private static void fulfill(final RequestTreeWindowModule module, final IRequest<?> request)
+    {
+        try
+        {
+            module.onFulfill(request);
+        }
+        catch (final NoSuchMethodError e)
+        {
+            try
+            {
+                final Class<?> supports = Class.forName("com.minecolonies.core.client.gui.modules.RequestTreeWindowModule$IRequestTreeSupportsFulfill");
+                supports.getMethod("onFulfill", IRequest.class).invoke(module, request);
+            }
+            catch (final ReflectiveOperationException | RuntimeException old)
+            {
+                throw new IllegalStateException("No way to fulfill a request in this MineColonies version", old);
+            }
+        }
     }
 
     @Override

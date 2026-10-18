@@ -1,6 +1,5 @@
 package fr.mcvanillatweaks.client.hud;
 
-import fr.mcvanillatweaks.MineColoniesVanillaTweaks;
 import fr.mcvanillatweaks.client.PinnedBuilders;
 import fr.mcvanillatweaks.client.data.BuilderRef;
 import fr.mcvanillatweaks.client.data.HudSnapshot;
@@ -10,7 +9,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -57,7 +55,7 @@ public final class HudLayoutScreen extends Screen
         final int y = height - BUTTON_HEIGHT - 8;
 
         addRenderableWidget(Button.builder(Component.translatable("screen.mcvanillatweaks.layout.settings"),
-            button -> minecraft.setScreen(new ConfigurationScreen(MineColoniesVanillaTweaks.container(), this)))
+            button -> fr.mcvanillatweaks.client.ModSettings.open(this))
           .bounds(x, y, BUTTON_WIDTH, BUTTON_HEIGHT)
           .build());
         addRenderableWidget(Button.builder(Component.translatable("screen.mcvanillatweaks.layout.reset_all"),

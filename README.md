@@ -1,6 +1,6 @@
 # MineColonies Vanilla Tweaks
 
-A client-side addon for [MineColonies](https://minecolonies.com) that redraws its windows as vanilla Minecraft
+An addon for [MineColonies](https://minecolonies.com) that redraws its windows as vanilla Minecraft
 Java Edition screens, and adds a few tools for running a colony.
 
 > Unofficial addon: not made by or affiliated with the LDT Team, the authors of MineColonies.
@@ -21,6 +21,8 @@ Java Edition screens, and adds a few tools for running a colony.
 - **Resource HUD**: a permanent overlay listing what your builders still need, with the same numbers as the
   Resource Scroll. Hold a scroll and press **J** to pin it, **P** to move the panels, **H** to show or hide them.
 - **Locate beams**: a coloured beacon beam above a citizen, a hut or a grave, with its direction and distance.
+- **Citizen names**: built-in French and international name lists, or your own (male and female first names,
+  surnames), for the new citizens of your colonies.
 - **Bug fixes** for a few MineColonies window glitches.
 
 Every screen can be switched off on its own in the config (**K**, or *Mods > MineColonies Vanilla Tweaks > Config*).
@@ -32,7 +34,8 @@ and MineColonies' own window is shown instead.
 - Minecraft 1.21.1 with NeoForge 21.1.251 or newer
 - MineColonies 1.1.1368 or newer (and its own dependencies: Structurize, BlockUI, Domum Ornamentum)
 
-Client only: install it in your game's `mods` folder; servers do not need it.
+Install it in your game's `mods` folder. Servers only need it for custom citizen names and the hungry cook fix (single
+player needs nothing more); players and servers without it can still connect.
 
 Languages: English, French.
 
@@ -40,7 +43,7 @@ Languages: English, French.
 
 1. Install JDK 21.
 2. Put these jars in `libs/` (from the MineColonies downloads, same file names):
-   `minecolonies-1.1.1368-1.21.1.jar`, `structurize-1.0.832-1.21.1.jar`, `blockui-1.0.209-1.21.1.jar`,
+   `minecolonies-1.1.1403-1.21.1.jar`, `structurize-1.0.832-1.21.1.jar`, `blockui-1.0.209-1.21.1.jar`,
    `domum-ornamentum-1.0.236-snapshot-main.jar`.
 3. Run `./gradlew build`. The mod is written to `build/libs/`, its source archive to `build/distributions/`.
 

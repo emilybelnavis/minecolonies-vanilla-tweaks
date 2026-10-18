@@ -27,6 +27,10 @@ public final class KeyBindings
     public static final KeyMapping HUD_LAYOUT = new KeyMapping(
       "key.mcvanillatweaks.hud_layout", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_P, CATEGORY);
 
+    /** Opens the colony guide: where the huts of the colony the player stands in are. */
+    public static final KeyMapping COLONY_GUIDE = new KeyMapping(
+      "key.mcvanillatweaks.colony_guide", KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G, CATEGORY);
+
     private KeyBindings()
     {
     }
@@ -37,5 +41,6 @@ public final class KeyBindings
         event.register(PIN_SCROLL);
         event.register(OPEN_SETTINGS);
         event.register(HUD_LAYOUT);
+        event.register(COLONY_GUIDE);
     }
 }

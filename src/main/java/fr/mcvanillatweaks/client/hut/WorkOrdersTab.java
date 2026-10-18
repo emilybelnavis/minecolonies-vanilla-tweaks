@@ -5,6 +5,7 @@ import com.minecolonies.api.colony.workorders.IWorkOrderView;
 import com.minecolonies.api.colony.workorders.WorkOrderType;
 import com.minecolonies.api.util.BlockPosUtil;
 import com.minecolonies.core.colony.buildings.modules.settings.StringSetting;
+import com.minecolonies.core.colony.buildings.moduleviews.BuildingResourcesModuleView;
 import com.minecolonies.core.colony.buildings.moduleviews.SettingsModuleView;
 import com.minecolonies.core.colony.buildings.moduleviews.WorkOrderListModuleView;
 import com.minecolonies.core.colony.buildings.workerbuildings.BuildingBuilder;
@@ -29,7 +30,8 @@ import java.util.Locale;
 
 /**
  * Builder's work orders page (MineColonies' work order module): the orders this builder works on and, in manual mode,
- * the free orders it can take, listed and sorted like MineColonies (same filters, highest priority first). Each row
+ * the free orders it can take, listed and sorted like MineColonies 1.1.1403 (same filters; the order the builder works
+ * on now first, outlined in green, then its other orders, then the free ones, each by priority). Each row
  * shows the building's hut, what is done (build, upgrade, repair, removal), the distance and its button: "assign" for a
  * free order in manual mode, "cancel" for this builder's orders (which removes the order, so it asks for a second
  * click). The buttons send MineColonies' messages.
@@ -50,6 +52,8 @@ final class WorkOrdersTab extends HutTab
     private final ScrollArea list = new ScrollArea();
     private List<IWorkOrderView> orders = List.of();
     private boolean manual;
+    /** The order the builder works on now (its resources module), or -1. */
+    private int current = -1;
     private int ticks;
     /** The order whose cancel button was clicked once, and until when the second click counts. */
     private int confirmId = -1;
@@ -92,18 +96,22 @@ final class WorkOrdersTab extends HutTab
             return;
         }
         final BlockPos here = building().getPosition();
+        final BuildingResourcesModuleView resources = building().getModuleViewByType(BuildingResourcesModuleView.class);
+        current = resources == null ? -1 : resources.getWorkOrderId();
         final List<IWorkOrderView> result = new ArrayList<>();
         for (final IWorkOrderView order : colony.getWorkOrders())
         {
             final boolean mine = here.equals(order.getClaimedBy());
             final boolean free = BlockPos.ZERO.equals(order.getClaimedBy());
             final boolean shown = order.shouldShowIn(building()) && order.canBuildIgnoringDistance(here, building().getBuildingLevel());
-            if (shown && mine || manual && free)
+            if (shown && (mine || manual && free))
             {
                 result.add(order);
             }
         }
-        result.sort(Comparator.comparingInt(IWorkOrderView::getPriority).reversed());
+        result.sort(Comparator.comparingInt((IWorkOrderView order) -> order.getID() == current ? 0 : mine(order) ? 1 : 2)
+                      .thenComparing(Comparator.comparingInt(IWorkOrderView::getPriority).reversed())
+                      .thenComparingInt(IWorkOrderView::getID));
         orders = result;
     }
 
@@ -187,7 +195,12 @@ final class WorkOrdersTab extends HutTab
         final MutableComponent text = type(order).copy();
         text.append(Component.literal(" · ").withStyle(ChatFormatting.DARK_GRAY))
           .append(Component.translatable("com.minecolonies.coremod.gui.blocks.distance", BlockPosUtil.getDistance2D(order.getLocation(), building().getPosition())));
-        if (mine(order))
+        if (order.getID() == current)
+        {
+            text.append(Component.literal(" · ").withStyle(ChatFormatting.DARK_GRAY))
+              .append(Component.translatable("mcvanillatweaks.hut.wo.current").withStyle(ChatFormatting.GREEN));
+        }
+        else if (mine(order))
         {
             text.append(Component.literal(" · ").withStyle(ChatFormatting.DARK_GRAY))
               .append(Component.translatable("mcvanillatweaks.hut.wo.mine").withStyle(ChatFormatting.GREEN));
@@ -238,6 +251,11 @@ final class WorkOrdersTab extends HutTab
             if (mine(order))
             {
                 g.fill(list.listX(), rowY, list.listX() + list.listWidth(), rowY + ROW, Gui.ROW_HOVER);
+            }
+            if (order.getID() == current)
+            {
+                // MineColonies outlines the current order in green.
+                g.renderOutline(list.listX(), rowY, list.listWidth(), ROW, 0xFF00AA00);
             }
             if (colony != null)
             {

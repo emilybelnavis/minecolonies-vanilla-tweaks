@@ -1,0 +1,13 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "fr.mcvanillatweaks.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "CitizenDataMixin",
+    "EntityAIEatTaskMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

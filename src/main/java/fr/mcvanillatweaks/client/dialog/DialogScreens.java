@@ -51,7 +51,8 @@ import java.util.List;
 /**
  * Swaps MineColonies' small one-shot windows for {@link DialogScreen}s (config {@code vanillaDialogs}): the generic
  * confirmation, the town hall placement windows (can't found here, founding covenant, reactivating an abandoned colony,
- * deleting or abandoning the old one), reactivating an abandoned hut and the builder's first-time guide.
+ * deleting or abandoning the old one), reactivating an abandoned hut and the builder's first-time guide. Also MultiPiston's
+ * settings window ({@link MultiPistonScreen}).
  * <p>
  * Texts are read from the replaced window's panes (MineColonies computes them: random story, distances...), and
  * every action presses the replaced window's own button ({@link #press}), so its messages, sounds, advancement triggers
@@ -59,6 +60,9 @@ import java.util.List;
  */
 public final class DialogScreens
 {
+    /** MultiPiston's settings window (an optional mod, so matched by name). */
+    private static final String MULTI_PISTON_WINDOW = "com.ldtteam.multipiston.WindowMultiPiston";
+
     private static boolean failed;
 
     private DialogScreens()
@@ -98,6 +102,24 @@ public final class DialogScreens
                 }
             }
             catch (final LinkageError | RuntimeException e)
+            {
+                report(e);
+            }
+            return;
+        }
+        if (enabled() && event.getNewScreen() instanceof BOScreen multiPiston && multiPiston.getWindow() != null
+              && MULTI_PISTON_WINDOW.equals(multiPiston.getWindow().getClass().getName()))
+        {
+            // MultiPiston is optional: its classes are only touched once its window shows up.
+            try
+            {
+                final net.minecraft.client.gui.screens.Screen replacement = MultiPistonScreen.of(multiPiston.getWindow());
+                if (replacement != null)
+                {
+                    event.setNewScreen(replacement);
+                }
+            }
+            catch (final LinkageError | RuntimeException | ReflectiveOperationException e)
             {
                 report(e);
             }

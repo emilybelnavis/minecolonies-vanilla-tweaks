@@ -135,7 +135,7 @@ public final class HutPreview
       "recipes", "stock", "stock_add", "tasks", "itemlist", "builder_home", "builder_resources", "builder_workorders", "warehouse_home",
       "warehouse_storage", "warehouse_search", "guard_home", "guard_workers", "guard_patrol", "guard_hostiles",
       "mine_home", "mine_levels", "mine_guards", "house_home", "house_residents", "restaurant_home", "restaurant_menu",
-      "farm_home", "farm_fields", "plantation_fields", "build", "build_builders", "build_confirm", "build_unbuilt", "graveyard_graves", "enchanter_gather", "storage", "rename", "info", "postbox", "clipboard", "buildtool", "packs", "postbox_requests", "cutter", "build_materials", "clipboard_dashboard", "clipboard_buildings", "clipboard_citizens", "tasks_crafter_idle", "teach_crafting", "teach_crafting_filled", "teach_furnace", "teach_brewing", "teach_domum", "teach_domum_picker", "colonymap", "colonymap_ranking", "barracks", "rally_banner", "questlog_inprogress", "questlog_available", "questlog_finished", "field", "field_seeds", "plantation_field", "hud", "nether_expedition", "nether_expedition_killed", "nether_expedition_none", "colony_rename", "mercenaries", "dialog_covenant", "dialog_old_colony", "dialog_guide", "connections", "banner", "decoration", "decoration_build", "chest", "select_res", "undo_redo", "config", "config_screens", "config_hud", "config_hud_layout", "config_hud_content", "config_beams", "clipboard_requests_end"};
+      "farm_home", "farm_fields", "plantation_fields", "build", "build_builders", "build_confirm", "build_unbuilt", "graveyard_graves", "enchanter_gather", "storage", "rename", "info", "postbox", "clipboard", "buildtool", "packs", "postbox_requests", "cutter", "build_materials", "clipboard_dashboard", "clipboard_buildings", "clipboard_citizens", "tasks_crafter_idle", "teach_crafting", "teach_crafting_filled", "teach_furnace", "teach_brewing", "teach_domum", "teach_domum_picker", "colonymap", "colonymap_ranking", "barracks", "rally_banner", "questlog_inprogress", "questlog_available", "questlog_finished", "field", "field_seeds", "plantation_field", "hud", "nether_expedition", "nether_expedition_killed", "nether_expedition_none", "colony_rename", "mercenaries", "dialog_covenant", "dialog_old_colony", "dialog_guide", "connections", "banner", "decoration", "decoration_build", "chest", "select_res", "undo_redo", "config", "config_screens", "config_hud", "config_hud_layout", "config_hud_content", "config_beams", "names", "names_search", "names_edit_list", "names_edit", "names_builtin", "names_icon", "guide", "guide_plan", "multipiston", "clipboard_requests_end"};
 
     private static int index = -1;
     private static int step;
@@ -293,11 +293,22 @@ public final class HutPreview
             SCREENS.add(fr.mcvanillatweaks.client.dialog.DialogPreview::chest);
             SCREENS.add(fr.mcvanillatweaks.client.dialog.DialogPreview::selectRes);
             SCREENS.add(fr.mcvanillatweaks.client.dialog.DialogPreview::undoRedo);
+            fr.mcvanillatweaks.client.locate.CompletionPreview.check();
             // The settings: NeoForge opens the only config file at once; variants open its sections at steps 3 and 6.
             for (int i = 0; i < 6; i++)
             {
-                SCREENS.add(() -> new net.neoforged.neoforge.client.gui.ConfigurationScreen(MineColoniesVanillaTweaks.container(), new net.minecraft.client.gui.screens.TitleScreen()));
+                SCREENS.add(() -> fr.mcvanillatweaks.client.ModSettings.create(MineColoniesVanillaTweaks.container(), new net.minecraft.client.gui.screens.TitleScreen()));
             }
+            SCREENS.add(fr.mcvanillatweaks.client.names.NamesPreview::lists);
+            SCREENS.add(fr.mcvanillatweaks.client.names.NamesPreview::search);
+            SCREENS.add(() -> fr.mcvanillatweaks.client.names.NamesPreview.edit(true, true));
+            SCREENS.add(() -> fr.mcvanillatweaks.client.names.NamesPreview.edit(true, false));
+            SCREENS.add(() -> fr.mcvanillatweaks.client.names.NamesPreview.edit(false, false));
+            SCREENS.add(fr.mcvanillatweaks.client.names.NamesPreview::icon);
+            SCREENS.add(() -> new fr.mcvanillatweaks.client.townhall.ColonyGuideScreen(sampleColony, false));
+            SCREENS.add(() -> new fr.mcvanillatweaks.client.townhall.ColonyGuideScreen(sampleColony, true));
+            SCREENS.add(() -> new fr.mcvanillatweaks.client.dialog.MultiPistonScreen(net.minecraft.core.BlockPos.ZERO,
+              net.minecraft.core.Direction.UP, net.minecraft.core.Direction.DOWN, 5, 2));
             SCREENS.add(() -> new fr.mcvanillatweaks.client.townhall.ClipboardScreen(sampleColony, false,
               fr.mcvanillatweaks.client.townhall.ClipboardScreen.Page.REQUESTS));
             index = 0;

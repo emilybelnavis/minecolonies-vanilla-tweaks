@@ -38,6 +38,31 @@ public final class HudConfig
         }
     }
 
+    /** What a click on a builder's "finished" message does ({@code CompletionMessages}). */
+    public enum CompletionClick implements TranslatableEnum
+    {
+        BOTH,
+        BEAM,
+        POSITION,
+        OFF;
+
+        public boolean beam()
+        {
+            return this == BOTH || this == BEAM;
+        }
+
+        public boolean position()
+        {
+            return this == BOTH || this == POSITION;
+        }
+
+        @Override
+        public Component getTranslatedName()
+        {
+            return Component.translatable(KEY + "completionClick." + name().toLowerCase(Locale.ROOT));
+        }
+    }
+
     private static final String KEY = "mcvanillatweaks.configuration.";
 
     public static final ModConfigSpec SPEC;
@@ -62,6 +87,8 @@ public final class HudConfig
     public static final ModConfigSpec.BooleanValue       VANILLA_ARCHITECTS_CUTTER;
     public static final ModConfigSpec.BooleanValue       VANILLA_DIALOGS;
     public static final ModConfigSpec.BooleanValue       DEATH_BEAMS;
+    public static final ModConfigSpec.EnumValue<CompletionClick> COMPLETION_CLICK;
+    public static final ModConfigSpec.BooleanValue       COLONY_GUIDE_MESSAGE;
 
     static
     {
@@ -170,6 +197,14 @@ public final class HudConfig
                         .comment("Show a red beacon beam above the grave of each dead citizen, until the grave is collected.")
                         .translation(KEY + "deathBeams")
                         .define("deathBeams", true);
+        COMPLETION_CLICK = builder
+                             .comment("What a click on a builder's \"building finished\" chat message does: BOTH (beacon beam and coordinates), BEAM, POSITION (coordinates in the chat) or OFF.")
+                             .translation(KEY + "completionClick")
+                             .defineEnum("completionClick", CompletionClick.BOTH);
+        COLONY_GUIDE_MESSAGE = builder
+                                 .comment("Say in the action bar, when entering someone else's colony, how many buildings it has and which key opens the colony guide.")
+                                 .translation(KEY + "colonyGuideMessage")
+                                 .define("colonyGuideMessage", true);
         builder.pop();
 
         SPEC = builder.build();

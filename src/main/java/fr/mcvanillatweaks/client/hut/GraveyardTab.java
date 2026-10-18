@@ -26,7 +26,7 @@ import java.util.List;
  * Graveyard page (MineColonies' graveyard module): on the left the graves the undertaker has to bring back, with the
  * citizen's name read from the grave like MineColonies (graves that disappeared are dropped every tick, as it does),
  * their distance and direction from the graveyard; a click outlines the grave in the world. On the right the citizens
- * buried here.
+ * buried here, with how many of the graveyard's plots are filled (MineColonies 1.1.1403 and later).
  * <pre>
  * Graves to collect: 2           Buried here: 3
  * +--------------------------+  +--------------------+
@@ -104,6 +104,20 @@ final class GraveyardTab extends HutTab
         return x + width * 3 / 5;
     }
 
+    /** Filled and total grave plots, or null before MineColonies 1.1.1403 (no such count). */
+    @Nullable
+    private int[] plots()
+    {
+        try
+        {
+            return new int[] {module.getFilledGravePlotCount(), module.getTotalGravePlotCount()};
+        }
+        catch (final LinkageError e)
+        {
+            return null;
+        }
+    }
+
     @Override
     protected void render(final GuiGraphics g, final int mouseX, final int mouseY, final Tooltip tooltip)
     {
@@ -113,7 +127,15 @@ final class GraveyardTab extends HutTab
         final int rightX = splitX() + 4;
         final int rightWidth = x + width - rightX;
         heading(g, Component.translatable("mcvanillatweaks.hut.graveyard.graves", positions.size()), x, y + 1, leftWidth);
-        heading(g, Component.translatable("mcvanillatweaks.hut.graveyard.buried", names.size()), rightX, y + 1, rightWidth);
+        final int[] plots = plots();
+        final Component buriedHeading = plots == null || plots[1] <= 0 ? Component.translatable("mcvanillatweaks.hut.graveyard.buried", names.size())
+                                          : Component.translatable("mcvanillatweaks.hut.graveyard.buried_plots", plots[0], plots[1]);
+        heading(g, buriedHeading, rightX, y + 1, rightWidth);
+        if (plots != null && plots[1] > 0 && Gui.inside(mouseX, mouseY, rightX, y, rightWidth, 11))
+        {
+            tooltip.set(List.of(buriedHeading, Component.translatable("com.minecolonies.coremod.gui.workerhuts.graveyard.plotsfilled", plots[0], plots[1])
+                                                 .withStyle(ChatFormatting.GRAY)));
+        }
 
         final int top = y + HEADING + 2;
         graves.set(x, top, leftWidth, y + height - top, positions.size() * GRAVE_ROW, GRAVE_ROW);

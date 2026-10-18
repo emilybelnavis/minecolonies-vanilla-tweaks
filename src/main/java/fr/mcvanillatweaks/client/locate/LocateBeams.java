@@ -244,6 +244,22 @@ public final class LocateBeams
     }
 
     /**
+     * {@link #toggle(IBuildingView)} for a hut known only by its position in the player's dimension (a builder's
+     * "finished" message, {@link CompletionMessages}): same key, so the hut's own locate button sees the beam.
+     */
+    public static boolean toggle(final BlockPos hut, final Component label)
+    {
+        final Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null)
+        {
+            return false;
+        }
+        final Vec3 pos = Vec3.atBottomCenterOf(hut);
+        return toggle("building/" + mc.level.dimension() + "/" + hut.asLong(),
+          new Target(label, BUILDING_COLOUR, mc.level.dimension(), partialTick -> pos, System.currentTimeMillis() + LIFETIME_MS));
+    }
+
+    /**
      * A red beam above a grave, kept while the colony still lists the grave (it goes when the grave is collected or dug
      * up), for {@link #GRAVE_LIFETIME_MS} at most. {@code message} is shown in the action bar when not null.
      */
@@ -298,6 +314,19 @@ public final class LocateBeams
     {
         final String custom = building.getCustomName();
         return custom == null || custom.isEmpty() ? Component.translatable(building.getBuildingDisplayName()) : Component.literal(custom);
+    }
+
+    /** Direction of a position relative to where the player looks ("" without a player). */
+    public static String arrow(final Vec3 pos)
+    {
+        final Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null)
+        {
+            return "";
+        }
+        final double angle = Math.toDegrees(Math.atan2(pos.z - mc.player.getZ(), pos.x - mc.player.getX())) - 90.0D;
+        final double relative = Mth.wrapDegrees(angle - mc.player.getYRot());
+        return ARROWS[Math.floorMod((int) Math.round(relative / 45.0D), 8)];
     }
 
     private static String key(final ICitizenDataView citizen)
@@ -488,12 +517,9 @@ public final class LocateBeams
             }
         }
 
-        /** Direction of the target relative to where the player looks. */
         private static String arrow(final Minecraft mc, final Vec3 pos)
         {
-            final double angle = Math.toDegrees(Math.atan2(pos.z - mc.player.getZ(), pos.x - mc.player.getX())) - 90.0D;
-            final double relative = Mth.wrapDegrees(angle - mc.player.getYRot());
-            return ARROWS[Math.floorMod((int) Math.round(relative / 45.0D), 8)];
+            return LocateBeams.arrow(pos);
         }
     }
 }
