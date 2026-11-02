@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- Added support for "MineColonies Voice Expanded"
+- Optional Voice Expanded integration: the citizen overview opens a vanilla-style voice and language picker when
+  the voice mod is installed. Vanilla Tweaks still works without it.
 
 - Fixed the build tool falling back to Structurize's windows when browsing leveled buildings before a preview
   position has been set.

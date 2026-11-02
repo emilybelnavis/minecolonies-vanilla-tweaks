@@ -41,6 +41,12 @@ final class OverviewPage extends PageView
     void render(final GuiGraphics g, final int mouseX, final int mouseY, final Tooltip tooltip)
     {
         final ICitizenDataView citizen = citizen();
+        if (VoiceExpandedScreen.available(citizen))
+        {
+            final Component label = Component.translatable("mcvanillatweaks.citizen.voice.title");
+            Gui.textButton(g, font, x, y + height - 14, width, 12, label.getString(), true,
+              Gui.inside(mouseX, mouseY, x, y + height - 14, width, 12));
+        }
         final int requestCount = screen.frame().requestCount();
         final int top = infoTop();
         Gui.inset(g, x, top, width, INFO_ROWS * ROW + 4);
@@ -145,6 +151,13 @@ final class OverviewPage extends PageView
     @Override
     boolean mouseClicked(final double mouseX, final double mouseY, final int button)
     {
+        if (button == 0 && VoiceExpandedScreen.available(citizen())
+          && Gui.inside(mouseX, mouseY, x, y + height - 14, width, 12))
+        {
+            Gui.clickSound();
+            VoiceExpandedScreen.open(screen, citizen());
+            return true;
+        }
         final int requestsY = infoTop() + 2 + REQUESTS_ROW * ROW;
         if (button == 0 && Gui.inside(mouseX, mouseY, x + 1, requestsY, width - 2, ROW))
         {

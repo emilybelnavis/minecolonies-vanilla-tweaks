@@ -1151,5 +1151,7 @@
   "mcvanillatweaks.names.list.dwarves": "Nains",
   "mcvanillatweaks.names.list.orcs": "Orcs",
   "mcvanillatweaks.hut.res.supply_all": "Tout fournir",
-  "mcvanillatweaks.hut.res.supply_all_hint": "Fournir à cette cabane tous les objets nécessaires de votre inventaire."
+  "mcvanillatweaks.hut.res.supply_all_hint": "Fournir à cette cabane tous les objets nécessaires de votre inventaire.",
+  "mcvanillatweaks.citizen.voice.title": "Voix et langue",
+  "mcvanillatweaks.citizen.voice.random": "Voix aléatoire"
 }

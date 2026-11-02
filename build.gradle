@@ -24,7 +24,7 @@ sourceSets {
 }
 
 neoForge {
-    version = project.neo_version
+    version = project.findProperty('dev_neo_version') ?: project.neo_version
 
     runs {
         client {
@@ -79,6 +79,8 @@ dependencies {
     // MineColonies, its required libraries and the optional MultiPiston: compiled against, never bundled.
     compileOnly colonyJars
     localRuntime colonyJars
+    // Optional local voice integration for runClient; never bundled or required.
+    localRuntime fileTree(dir: 'libs', include: ['minecolonies-voice-expanded-*.jar'])
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {

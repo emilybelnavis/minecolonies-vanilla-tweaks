@@ -47,3 +47,11 @@ config="${mod_id}.mixins.json"
     versionRange="${minecolonies_version_range}"
     ordering="AFTER"
     side="BOTH"
+
+# Voice controls are available only when Voice Expanded is installed.
+[[dependencies.${mod_id}]]
+    modId="voiceexpanded"
+    type="optional"
+    versionRange="[1.0.0,)"
+    ordering="AFTER"
+    side="CLIENT"

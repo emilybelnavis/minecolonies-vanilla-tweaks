@@ -58,3 +58,5 @@ This mod was made with the help of AI tools (Claude, by Anthropic). The ideas, t
 
 GNU General Public License v3.0 or later, see [LICENSE](LICENSE). MineColonies, Structurize, BlockUI and Domum
 Ornamentum are GPL-3 projects by the LDT Team; none of their files are included in this mod.
+
+Optional: with MineColonies Voice Expanded installed, adult citizens have a **Voice & Language** button on their overview. Voice Expanded is not required to use this mod. Voice changes use its existing server command and colony-management permissions.
